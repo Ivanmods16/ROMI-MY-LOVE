@@ -28,6 +28,7 @@ button {
   background: #ff4b5c;
   color: white;
   cursor: pointer;
+  margin-top: 10px;
 }
 
 #carta {
@@ -86,9 +87,10 @@ iframe {
     <b>Atentamente, Ivan 💌</b>
   </p>
 
-  <!-- Video -->
+  <button onclick="reproducir()">🎵 Reproducir canción</button>
+
   <iframe id="musica"
-    src=""
+    src="https://www.youtube.com/embed/kuPZD7uEJPo"
     allow="autoplay">
   </iframe>
 </div>
@@ -97,11 +99,11 @@ iframe {
 function abrirCarta() {
   document.getElementById("inicio").style.display = "none";
   document.getElementById("carta").style.display = "block";
+}
 
+function reproducir() {
   let iframe = document.getElementById("musica");
   iframe.style.display = "block";
-
-  // Se carga el video SOLO cuando el usuario hace clic (esto evita bloqueo)
   iframe.src = "https://www.youtube.com/embed/kuPZD7uEJPo?autoplay=1";
 }
 </script>
