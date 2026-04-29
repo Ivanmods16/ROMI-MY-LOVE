@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Atrapa mi corazón 💖</title>
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Nunito:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Nunito', sans-serif;
+            background: linear-gradient(160deg, #ff9a9e 0%, #fad0c4 50%, #ffecd2 100%);
+            min-height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        #ui {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 20;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 20px;
+            background: rgba(255,255,255,0.3);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255,255,255,0.5);
+        }
+
+        .ui-box {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #c0395a;
+            text-shadow: 0 1px 3px rgba(255,255,255,0.6);
+        }
+
+        #title-ui {
+            font-family: 'Dancing Script', cursive;
+            font-size: 1.4rem;
+            color: #ff5c7a;
+        }
+
+        canvas {
+            display: block;
+            position: fixed;
+            top: 0; left: 0;
+        }
+
+        /* Pantalla de inicio */
+        #screen-start, #screen-end {
+            position: fixed;
+            inset: 0;
+            z-index: 30;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            background: linear-gradient(160deg, #ff9a9e 0%, #fecfef 100%);
+            padding: 30px;
+        }
+
+        #screen-end { display: none; }
+
+        .screen-card {
+            background: rgba(255,255,255,0.85);
+            backdrop-filter: blur(16px);
+            border-radius: 30px;
+            padding: 40px 35px;
+            max-width: 380px;
+            width: 90%;
+            box-shadow: 0 20px 60px rgba(255,100,130,0.25);
+            border: 1px solid rgba(255,255,255,0.7);
+        }
+
+        .screen-card h1 {
+            font-family: 'Dancing Script', cursive;
+            font-size: 2.8rem;
+            color: #ff5c7a;
+            margin-bottom: 10px;
+        }
+
+        .screen-card h2 {
+            font-family: 'Dancing Script', cursive;
+            font-size: 2rem;
+            color: #ff5c7a;
+            margin-bottom: 10px;
+        }
+
+        .screen-card p {
+            color: #885;
+            font-size: 1rem;
+            line-height: 1.7;
+            margin-bottom: 25px;
+        }
+
+        .legend {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 25px;
+            text-align: left;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.95rem;
+            color: #664;
+        }
+
+        .legend-icon {
+            font-size: 1.5rem;
+            width: 36px;
+            text-align: center;
+        }
+
+        .btn-play {
+            padding: 14px 40px;
+            font-family: 'Nunito', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 700;
+            border: none;
+            border-radius: 50px;
+            background: linear-gradient(45deg, #ff758c, #ff7eb3);
+            color: white;
+            cursor: pointer;
+            box-shadow: 0 6px 20px rgba(255,117,140,0.45);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .btn-play:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 28px rgba(255,117,140,0.6);
+        }
+
+        #final-score {
+            font-family: 'Dancing Script', cursive;
+            font-size: 3rem;
+            color: #ff5c7a;
+            margin: 10px 0 5px;
+        }
+
+        #final-msg {
+            font-family: 'Dancing Script', cursive;
+            font-size: 1.3rem;
+            color: #aa5;
+            margin-bottom: 20px;
+        }
+
+        .btn-back {
+            display: inline-block;
+            margin-top: 12px;
+            padding: 10px 25px;
+            font-family: 'Nunito', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 700;
+            border: 2px solid #ff758c;
+            border-radius: 50px;
+            background: transparent;
+            color: #ff758c;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .btn-back:hover {
+            background: #ff758c;
+            color: white;
+        }
+
+        /* Corazón animado decorativo */
+        .deco-heart {
+            font-size: 3rem;
+            animation: latido 1.2s ease-in-out infinite;
+            display: inline-block;
+            margin-bottom: 10px;
+        }
+
+        @keyframes latido {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Canvas del juego -->
+<canvas id="game"></canvas>
+
+<!-- UI en juego -->
+<div id="ui" style="display:none">
+    <div class="ui-box">💖 <span id="score-display">0</span></div>
+    <div id="title-ui">Atrapa mi corazón</div>
+    <div class="ui-box">💔 <span id="lives-display">3</span></div>
+</div>
+
+<!-- Pantalla de inicio -->
+<div id="screen-start">
+    <div class="screen-card">
+        <div class="deco-heart">💖</div>
+        <h1>Atrapa mi corazón</h1>
+        <p>Mueve la cesta para atrapar los corazones de Ivan… ¡pero cuidado con los corazones rotos!</p>
+        <div class="legend">
+            <div class="legend-item"><span class="legend-icon">💖</span> Corazón = +1 punto</div>
+            <div class="legend-item"><span class="legend-icon">💗</span> Corazón dorado = +3 puntos</div>
+            <div class="legend-item"><span class="legend-icon">💔</span> Corazón roto = pierdes una vida</div>
+        </div>
+        <button class="btn-play" onclick="startGame()">¡Jugar! 🎮</button>
+        <br>
+        <a href="index.html" class="btn-back">← Volver a la carta</a>
+    </div>
+</div>
+
+<!-- Pantalla de fin -->
+<div id="screen-end">
+    <div class="screen-card">
+        <div class="deco-heart">💔</div>
+        <h2>¡Juego terminado!</h2>
+        <div id="final-score">0</div>
+        <div id="final-msg"></div>
+        <button class="btn-play" onclick="restartGame()">Volver a jugar 💖</button>
+        <br>
+        <a href="index.html" class="btn-back">← Volver a la carta</a>
+    </div>
+</div>
+
+<script>
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
+
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+window.addEventListener("resize", () => {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    basket.y = canvas.height - 80;
+});
+
+// Estado del juego
+let score = 0;
+let lives = 3;
+let speed = 3;
+let running = false;
+let spawnInterval = null;
+
+// Cesta
+const basket = {
+    x: canvas.width / 2,
+    y: canvas.height - 80,
+    w: 90,
+    h: 30
+};
+
+// Objetos cayendo
+let items = [];
+
+// Partículas
+let particles = [];
+
+// Control mouse / touch
+document.addEventListener("mousemove", e => {
+    if (running) basket.x = e.clientX;
+});
+document.addEventListener("touchmove", e => {
+    e.preventDefault();
+    if (running) basket.x = e.touches[0].clientX;
+}, { passive: false });
+
+function spawnItem() {
+    const rand = Math.random();
+    let type;
+    if (rand < 0.65) type = "heart";
+    else if (rand < 0.80) type = "gold";
+    else type = "broken";
+
+    items.push({
+        x: Math.random() * (canvas.width - 40) + 20,
+        y: -30,
+        vy: speed + Math.random() * 2,
+        type,
+        size: type === "gold" ? 38 : 32,
+        emoji: type === "heart" ? "💖" : type === "gold" ? "💗" : "💔",
+        opacity: 1
+    });
+}
+
+function spawnParticles(x, y, color) {
+    for (let i = 0; i < 8; i++) {
+        const angle = (Math.PI * 2 / 8) * i;
+        particles.push({
+            x, y,
+            vx: Math.cos(angle) * (2 + Math.random() * 3),
+            vy: Math.sin(angle) * (2 + Math.random() * 3),
+            life: 1,
+            color,
+            size: 6 + Math.random() * 6
+        });
+    }
+}
+
+function drawBasket(x, y, w, h) {
+    // Sombra
+    ctx.save();
+    ctx.shadowColor = "rgba(255,100,130,0.4)";
+    ctx.shadowBlur = 15;
+
+    // Cuerpo
+    ctx.fillStyle = "rgba(255,255,255,0.85)";
+    ctx.strokeStyle = "#ff758c";
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.roundRect(x - w/2, y - h/2, w, h, 15);
+    ctx.fill();
+    ctx.stroke();
+
+    // Corazón en la cesta
+    ctx.font = "18px serif";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText("💝", x, y);
+    ctx.restore();
+}
+
+function drawSnowflakes() {
+    // Decoración fija de fondo
+    ctx.save();
+    ctx.globalAlpha = 0.07;
+    ctx.fillStyle = "#fff";
+    ctx.font = "20px serif";
+    for (let i = 0; i < 12; i++) {
+        ctx.fillText("❄", (canvas.width / 12) * i + 20, 40);
+    }
+    ctx.restore();
+}
+
+function updateUI() {
+    document.getElementById("score-display").textContent = score;
+    document.getElementById("lives-display").textContent = lives;
+}
+
+function gameOver() {
+    running = false;
+    clearInterval(spawnInterval);
+    document.getElementById("ui").style.display = "none";
+    document.getElementById("final-score").textContent = score + " pts";
+
+    let msg = "";
+    if (score >= 30) msg = "¡Sos increíble mi Romiuu! 💖✨";
+    else if (score >= 15) msg = "¡Muy bien! Ivan está orgulloso 💕";
+    else if (score >= 5) msg = "¡Casi! Intentalo de nuevo 🌸";
+    else msg = "¡Dale otra oportunidad! 💌";
+
+    document.getElementById("final-msg").textContent = msg;
+    document.getElementById("screen-end").style.display = "flex";
+}
+
+function startGame() {
+    score = 0; lives = 3; speed = 3;
+    items = []; particles = [];
+    document.getElementById("screen-start").style.display = "none";
+    document.getElementById("screen-end").style.display = "none";
+    document.getElementById("ui").style.display = "flex";
+    running = true;
+    updateUI();
+    clearInterval(spawnInterval);
+    spawnInterval = setInterval(spawnItem, 800);
+    loop();
+}
+
+function restartGame() {
+    startGame();
+}
+
+function loop() {
+    if (!running) return;
+
+    // Fondo
+    const grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+    grad.addColorStop(0, "#ff9a9e");
+    grad.addColorStop(0.5, "#fad0c4");
+    grad.addColorStop(1, "#ffecd2");
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    drawSnowflakes();
+
+    // Items
+    for (let i = items.length - 1; i >= 0; i--) {
+        const item = items[i];
+        item.y += item.vy;
+
+        // Dibujar emoji
+        ctx.save();
+        ctx.font = `${item.size * 1.5}px serif`;
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.globalAlpha = item.opacity;
+        ctx.fillText(item.emoji, item.x, item.y);
+        ctx.restore();
+
+        // Colisión con cesta
+        if (
+            item.y + item.size / 2 > basket.y - basket.h / 2 &&
+            item.y - item.size / 2 < basket.y + basket.h / 2 &&
+            item.x > basket.x - basket.w / 2 &&
+            item.x < basket.x + basket.w / 2
+        ) {
+            if (item.type === "heart") {
+                score += 1;
+                spawnParticles(item.x, item.y, "#ff5c7a");
+            } else if (item.type === "gold") {
+                score += 3;
+                spawnParticles(item.x, item.y, "#f1c40f");
+            } else {
+                lives -= 1;
+                spawnParticles(item.x, item.y, "#888");
+                if (lives <= 0) { gameOver(); return; }
+            }
+            items.splice(i, 1);
+            updateUI();
+            // Aumentar velocidad gradualmente
+            speed = 3 + score * 0.08;
+            continue;
+        }
+
+        // Fuera de pantalla
+        if (item.y > canvas.height + 40) {
+            items.splice(i, 1);
+        }
+    }
+
+    // Partículas
+    for (let i = particles.length - 1; i >= 0; i--) {
+        const p = particles[i];
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vy += 0.15;
+        p.life -= 0.04;
+        if (p.life <= 0) { particles.splice(i, 1); continue; }
+        ctx.save();
+        ctx.globalAlpha = p.life;
+        ctx.fillStyle = p.color;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size * p.life, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+    }
+
+    // Cesta
+    drawBasket(basket.x, basket.y, basket.w, basket.h);
+
+    requestAnimationFrame(loop);
+}
+</script>
+</body>
+</html>
