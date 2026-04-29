@@ -399,6 +399,22 @@
 
         document.getElementById("btnFlores").style.display = "none";
 
+        // Añadir botón del chat
+        const btnChat = document.createElement('button');
+        btnChat.innerHTML = "Entrar a nuestro Chat Secreto 💌";
+        btnChat.style.marginTop = "30px";
+        btnChat.style.background = "linear-gradient(to right, #ff758c, #ff7eb3)";
+        btnChat.style.color = "white";
+        btnChat.style.border = "none";
+        btnChat.style.padding = "15px 30px";
+        btnChat.style.borderRadius = "25px";
+        btnChat.style.cursor = "pointer";
+        btnChat.style.fontFamily = "'Montserrat', sans-serif";
+        btnChat.style.fontWeight = "600";
+        btnChat.style.boxShadow = "0 10px 20px rgba(255, 117, 140, 0.3)";
+        btnChat.onclick = () => window.location.href = 'chat.html';
+        container.parentElement.appendChild(btnChat);
+
         setTimeout(() => {
             window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
         }, 100);
