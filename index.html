@@ -156,26 +156,18 @@
             width: 100%;
             height: 80px;
             border-radius: 15px;
+            display: none;
             border: none;
-            opacity: 0;
-            transition: opacity 0.8s ease;
         }
 
         /* Sección de Flores */
         #flores-container {
+            display: none;
             margin-top: 30px;
-            display: flex;
             justify-content: center;
             gap: 20px;
             flex-wrap: wrap;
-            opacity: 0;
-            transform: translateY(20px);
-            transition: opacity 0.8s ease, transform 0.8s ease;
-        }
-
-        #flores-container.visible {
-            opacity: 1;
-            transform: translateY(0);
+            animation: fadeIn 1s ease;
         }
 
         .flower {
@@ -275,7 +267,6 @@
     <h1>💌 Tengo algo especial para ti...</h1>
     <button onclick="abrirCarta()">Abrir con amor</button>
 </div>
-
 <!-- Carta -->
 <div id="carta">
     <span class="mensaje-especial">WEB HECHA PARA TI ESPECIALMENTE MI ROMIU</span>
@@ -316,10 +307,16 @@
     <p style="font-family: 'Dancing Script', cursive; font-size: 1.3rem; color: var(--primary-pink); margin-bottom: 5px;">
         Esta música es para ti ❤️ 🎶
     </p>
+</div>
+    <!-- Botones de acción -->
+    <div class="actions">
+        <button onclick="reproducir()">🎵 Reproducir canción</button>
+        <button onclick="mostrarFlores()" id="btnFlores">🌸 VER FLORES</button>
+    </div>
 
     <!-- Reproductor de música -->
     <iframe id="musica"
-            src=""
+            src="https://www.youtube.com/embed/kuPZD7uEJPo"
             allow="autoplay">
     </iframe>
 
@@ -364,34 +361,22 @@
             inicio.style.display = "none";
             carta.style.display = "block";
             footer.style.display = "block";
-
             setTimeout(() => {
-                // Mostrar carta con animación
                 carta.style.opacity = "1";
                 carta.style.transform = "scale(1) rotateY(0deg)";
-
-                // Reproducir música automáticamente
-                setTimeout(() => {
-                    reproducir();
-                }, 600);
-
-                // Mostrar flores automáticamente
-                setTimeout(() => {
-                    mostrarFlores();
-                }, 1000);
-
             }, 50);
         }, 800);
     }
 
     function reproducir() {
-        const iframe = document.getElementById("musica");
+        let iframe = document.getElementById("musica");
+        iframe.style.display = "block";
         iframe.src = "https://www.youtube.com/embed/kuPZD7uEJPo?autoplay=1";
-        iframe.style.opacity = "1";
     }
 
     function mostrarFlores() {
         const container = document.getElementById("flores-container");
+        container.style.display = "flex";
         container.innerHTML = "";
 
         for (let i = 0; i < 3; i++) {
@@ -410,14 +395,11 @@
             container.appendChild(flower);
         }
 
-        // Animar con clase visible
-        setTimeout(() => {
-            container.classList.add('visible');
-        }, 100);
+        document.getElementById("btnFlores").style.display = "none";
 
         setTimeout(() => {
             window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
-        }, 300);
+        }, 100);
     }
 </script>
 
