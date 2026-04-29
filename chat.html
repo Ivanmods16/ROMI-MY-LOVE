@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Chat 💗</title>
+    <title>Chat</title>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
@@ -125,11 +125,18 @@
 
         #messages::-webkit-scrollbar { width: 0; }
 
+        .bubble-container {
+            display: flex; flex-direction: column; width: 100%; margin-bottom: 2px;
+            position: relative;
+        }
+
         .bubble {
             max-width: 78%; padding: 9px 13px 6px;
             border-radius: 18px; font-size: 14px; line-height: 1.45;
             color: #eee; word-break: break-word;
             animation: msgIn .2s ease;
+            position: relative;
+            cursor: pointer;
         }
 
         @keyframes msgIn { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
@@ -144,40 +151,50 @@
 
         .day-divider { text-align: center; font-size: 11px; color: #333; margin: 10px 0 4px; }
 
+        /* Reacciones */
+        .reactions {
+            display: flex; gap: 2px; position: absolute; bottom: -8px;
+            z-index: 5;
+        }
+        .sent .reactions { right: 8px; }
+        .received .reactions { left: 8px; }
+
+        .reaction-chip {
+            background: #252525; border: 1px solid #333;
+            border-radius: 10px; padding: 2px 4px; font-size: 10px;
+            display: flex; align-items: center; gap: 2px; color: #aaa;
+        }
+
+        /* Menú contextual personalizado */
+        #msg-menu {
+            display: none; position: fixed; background: #1a1a1a;
+            border: 0.5px solid #333; border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5); z-index: 500;
+            width: 180px; overflow: hidden;
+            animation: menuIn .15s ease;
+        }
+        @keyframes menuIn { from{opacity:0;transform:scale(0.9)} to{opacity:1;transform:scale(1)} }
+
+        .menu-item {
+            padding: 12px 15px; font-size: 13px; color: #ccc;
+            cursor: pointer; display: flex; align-items: center; gap: 10px;
+        }
+        .menu-item:hover { background: #252525; color: #fff; }
+        .menu-item.danger { color: #ff4444; }
+        .menu-item.danger:hover { background: #301010; }
+
+        .reaction-row {
+            display: flex; justify-content: space-between; padding: 10px;
+            border-bottom: 0.5px solid #333; background: #111;
+        }
+        .reaction-btn { font-size: 18px; cursor: pointer; transition: transform .1s; }
+        .reaction-btn:hover { transform: scale(1.3); }
+
         /* Imágenes en burbujas */
         .bubble-img {
             max-width: 220px; border-radius: 12px; display: block;
             cursor: pointer; margin-bottom: 4px;
         }
-
-        /* Audio en burbujas */
-        .audio-bubble {
-            display: flex; align-items: center; gap: 10px;
-            min-width: 180px; padding: 4px 0;
-        }
-
-        .play-btn {
-            width: 34px; height: 34px; border-radius: 50%;
-            background: rgba(255,255,255,0.15);
-            display: flex; align-items: center; justify-content: center;
-            cursor: pointer; flex-shrink: 0; border: none;
-            transition: background .15s;
-        }
-
-        .play-btn:hover { background: rgba(255,255,255,0.25); }
-        .play-btn svg { fill: white; width: 14px; height: 14px; }
-
-        .audio-waves {
-            flex: 1; height: 28px; display: flex; align-items: center; gap: 2px;
-        }
-
-        .wave-bar {
-            width: 3px; border-radius: 2px;
-            background: rgba(255,255,255,0.4);
-            flex-shrink: 0;
-        }
-
-        .audio-dur { font-size: 11px; color: rgba(255,255,255,0.5); flex-shrink: 0; }
 
         /* ── INPUT AREA ── */
         #input-area {
@@ -221,59 +238,15 @@
         #send-btn:active { background: #cc0040; transform: scale(0.93); }
         #send-btn svg { width: 17px; height: 17px; fill: white; }
 
-        /* Grabación de audio */
-        #rec-indicator {
-            display: none; align-items: center; gap: 8px;
-            padding: 8px 14px; background: #1a0a0a;
-            border-top: 0.5px solid #2a1a1a; flex-shrink: 0;
-        }
-
-        .rec-dot { width: 10px; height: 10px; background: #ff0050; border-radius: 50%; animation: blink 1s infinite; }
-        @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
-        #rec-time { font-size: 13px; color: #ff4444; font-variant-numeric: tabular-nums; }
-        #rec-cancel { font-size: 12px; color: #555; cursor: pointer; margin-left: auto; }
-        #rec-cancel:hover { color: #ff0050; }
-
-        /* Selector de emoji */
+        /* Panel Emojis */
         #emoji-panel {
             display: none; padding: 10px 12px; background: #0f0f0f;
             border-top: 0.5px solid #1a1a1a; flex-wrap: wrap; gap: 6px;
             max-height: 160px; overflow-y: auto; flex-shrink: 0;
         }
+        #emoji-panel span { font-size: 22px; cursor: pointer; }
 
-        #emoji-panel span {
-            font-size: 22px; cursor: pointer; line-height: 1;
-            transition: transform .1s;
-        }
-
-        #emoji-panel span:hover { transform: scale(1.25); }
-
-        /* Preview de imagen */
-        #img-preview-bar {
-            display: none; padding: 8px 12px; background: #0f0f0f;
-            border-top: 0.5px solid #1a1a1a; align-items: center; gap: 10px;
-            flex-shrink: 0;
-        }
-
-        #img-preview-bar img { width: 52px; height: 52px; border-radius: 10px; object-fit: cover; }
-        #img-preview-bar .cancel-img { color: #555; cursor: pointer; font-size: 20px; margin-left: auto; }
-        #img-preview-bar .cancel-img:hover { color: #ff0050; }
-        #img-preview-label { font-size: 12px; color: #555; }
-
-        /* Lightbox */
-        #lightbox {
-            display: none; position: fixed; inset: 0;
-            background: rgba(0,0,0,0.95); z-index: 300;
-            justify-content: center; align-items: center;
-        }
-
-        #lightbox img { max-width: 95%; max-height: 90dvh; border-radius: 12px; }
-        #lightbox-close { position: absolute; top: 18px; right: 18px; color: #fff; font-size: 28px; cursor: pointer; }
-
-        /* Archivos ocultos */
-        #photo-file, #avatar-file-chat { display: none; }
-
-        /* toast */
+        /* Toast */
         #toast {
             position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%);
             background: #222; color: #fff; font-size: 13px; padding: 8px 18px;
@@ -288,7 +261,7 @@
     <div class="login-logo">💗</div>
     <div class="login-card">
         <h1>Bienvenida</h1>
-        <p>Elige tu foto y tu nombre</p>
+        <p>Solo verás los mensajes nuevos al entrar</p>
         <div class="avatar-picker">
             <div class="avatar-ring" onclick="document.getElementById('avatar-file').click()">
                 <img id="avatar-preview" alt="">
@@ -298,10 +271,9 @@
         </div>
         <input type="text" id="username-input" placeholder="Tu nombre..." autocomplete="off" maxlength="20">
         <button onclick="joinChat()">
-            <svg viewBox="0 0 24 24" style="width:16px;height:16px;fill:white"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9V8h2v8zm4 0h-2V8h2v8z"/></svg>
             Entrar al chat
         </button>
-        <div id="login-loading">Subiendo foto...</div>
+        <div id="login-loading">Configurando todo...</div>
     </div>
 </div>
 
@@ -319,59 +291,41 @@
 <!-- MENSAJES -->
 <div id="messages"></div>
 
-<!-- GRABACIÓN -->
-<div id="rec-indicator">
-    <div class="rec-dot"></div>
-    <span id="rec-time">0:00</span>
-    <span id="rec-cancel" onclick="cancelRec()">✕ Cancelar</span>
+<!-- MENÚ CONTEXTUAL -->
+<div id="msg-menu">
+    <div class="reaction-row">
+        <span class="reaction-btn" onclick="react('❤️')">❤️</span>
+        <span class="reaction-btn" onclick="react('😂')">😂</span>
+        <span class="reaction-btn" onclick="react('😮')">😮</span>
+        <span class="reaction-btn" onclick="react('😢')">😢</span>
+        <span class="reaction-btn" onclick="react('🔥')">🔥</span>
+    </div>
+    <div class="menu-item" onclick="deleteForMe()">Ocultar para mí</div>
+    <div id="menu-del-all" class="menu-item danger" onclick="deleteForEveryone()">Eliminar para todos</div>
 </div>
 
-<!-- PREVIEW IMAGEN -->
-<div id="img-preview-bar">
-    <img id="img-preview-thumb" alt="">
-    <span id="img-preview-label">Lista para enviar</span>
-    <span class="cancel-img" onclick="cancelImg()">✕</span>
-</div>
-
-<!-- PANEL EMOJI -->
-<div id="emoji-panel"></div>
-
-<!-- INPUT -->
+<!-- INPUT AREA -->
 <div id="input-area">
     <div class="extra-btns">
-        <!-- Emoji -->
-        <div class="icon-btn" id="emoji-btn" onclick="toggleEmoji()">
+        <div class="icon-btn" onclick="toggleEmoji()">
             <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm3.5-9c.83 0 1.5-.67 1.5-1.5S16.33 8 15.5 8 14 8.67 14 9.5s.67 1.5 1.5 1.5zm-7 0c.83 0 1.5-.67 1.5-1.5S9.33 8 8.5 8 7 8.67 7 9.5 7.67 11 8.5 11zm3.5 6.5c2.33 0 4.31-1.46 5.11-3.5H6.89c.8 2.04 2.78 3.5 5.11 3.5z"/></svg>
         </div>
-        <!-- Foto -->
         <div class="icon-btn" onclick="document.getElementById('photo-file').click()">
             <svg viewBox="0 0 24 24"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>
         </div>
         <input type="file" id="photo-file" accept="image/*">
-        <!-- Audio -->
-        <div class="icon-btn" id="mic-btn" onclick="toggleRec()">
-            <svg viewBox="0 0 24 24"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.91-3c-.49 0-.9.36-.98.85C16.52 14.2 14.47 16 12 16s-4.52-1.8-4.93-4.15c-.08-.49-.49-.85-.98-.85-.61 0-1.09.54-1 1.14.49 3 2.89 5.35 5.91 5.78V20c0 .55.45 1 1 1s1-.45 1-1v-2.08c3.02-.43 5.42-2.78 5.91-5.78.1-.6-.39-1.14-1-1.14z"/></svg>
-        </div>
     </div>
-
     <textarea id="msg-input" placeholder="Mensaje..." rows="1" autocomplete="off"></textarea>
-
     <button id="send-btn" onclick="sendMessage()">
         <svg viewBox="0 0 24 24"><path d="M2 21l21-9L2 3v7l15 2-15 2z"/></svg>
     </button>
 </div>
 
-<!-- LIGHTBOX -->
-<div id="lightbox" onclick="closeLightbox()">
-    <span id="lightbox-close">✕</span>
-    <img id="lightbox-img" alt="">
-</div>
-
-<!-- TOAST -->
+<div id="emoji-panel"></div>
 <div id="toast"></div>
 
 <script>
-// ──────────── FIREBASE CONFIG ────────────
+// FIREBASE CONFIG
 const firebaseConfig = {
   apiKey: "AIzaSyCY2qGZrlJ9Fa3JbAkKoWiVL5Jz5YBKT4c",
   authDomain: "chatsecrect-90b82.firebaseapp.com",
@@ -382,73 +336,32 @@ const firebaseConfig = {
   appId: "1:111901784465:web:161b363c5991f56daf8230",
   measurementId: "G-7B2N9MR1QR"
 };
-// ─────────────────────────────────────────
 
 firebase.initializeApp(firebaseConfig);
-const db      = firebase.database();
+const db = firebase.database();
 const storage = firebase.storage();
 
-let myName   = localStorage.getItem("chatName")  || "";
+let myName = localStorage.getItem("chatName") || "";
 let myAvatar = localStorage.getItem("chatAvatar") || "";
+let joinTime = localStorage.getItem("chatJoinTime") || 0;
+let hiddenMsgs = JSON.parse(localStorage.getItem("hiddenMsgs") || "[]");
+let activeMsgId = null;
 
-// ── AVATAR SELECTOR EN LOGIN ──
-const avatarFile    = document.getElementById('avatar-file');
-const avatarPreview = document.getElementById('avatar-preview');
-let   pendingAvatarFile = null;
+// NOTIFICACIONES
+if ("Notification" in window) Notification.requestPermission();
 
-avatarFile.addEventListener('change', e => {
-    const f = e.target.files[0];
-    if (!f) return;
-    pendingAvatarFile = f;
-    const reader = new FileReader();
-    reader.onload = ev => {
-        avatarPreview.src = ev.target.result;
-        avatarPreview.style.display = 'block';
-        document.getElementById('avatar-plus').style.display = 'none';
-    };
-    reader.readAsDataURL(f);
-});
-
-async function joinChat() {
+function joinChat() {
     const val = document.getElementById('username-input').value.trim();
     if (!val) { showToast("Escribe tu nombre"); return; }
+    
     myName = val;
-
-    if (pendingAvatarFile) {
-        document.getElementById('login-loading').style.display = 'block';
-        try {
-            const url = await uploadFile(pendingAvatarFile, 'avatars/' + myName + '_' + Date.now());
-            myAvatar = url;
-        } catch(e) { console.warn("Avatar upload failed", e); }
-        document.getElementById('login-loading').style.display = 'none';
+    if (!joinTime) {
+        joinTime = Date.now();
+        localStorage.setItem("chatJoinTime", joinTime);
     }
-
-    localStorage.setItem("chatName",   myName);
-    localStorage.setItem("chatAvatar", myAvatar);
+    
+    localStorage.setItem("chatName", myName);
     startChat();
-}
-
-// ── AVATAR CAMBIAR DESDE TOPBAR ──
-document.getElementById('avatar-file-chat').addEventListener('change', async e => {
-    const f = e.target.files[0];
-    if (!f) return;
-    showToast("Subiendo foto de perfil...");
-    try {
-        const url = await uploadFile(f, 'avatars/' + myName + '_' + Date.now());
-        myAvatar = url;
-        localStorage.setItem("chatAvatar", myAvatar);
-        renderTbAvatar();
-        showToast("Foto actualizada ✓");
-    } catch(err) { showToast("Error al subir foto"); }
-});
-
-function renderTbAvatar() {
-    const el = document.getElementById('tb-avatar');
-    if (myAvatar) {
-        el.innerHTML = `<img src="${myAvatar}" alt="">`;
-    } else {
-        el.textContent = myName.charAt(0).toUpperCase();
-    }
 }
 
 function startChat() {
@@ -456,283 +369,159 @@ function startChat() {
     document.getElementById('topbar').style.display = 'flex';
     document.getElementById('messages').style.display = 'flex';
     document.getElementById('input-area').style.display = 'flex';
-    renderTbAvatar();
     loadMessages();
 }
 
-function logout() {
-    if (!confirm("¿Salir del chat? Tendrás que poner tu nombre de nuevo.")) return;
-    localStorage.removeItem("chatName");
-    localStorage.removeItem("chatAvatar");
-    location.reload();
+function loadMessages() {
+    // Escuchamos solo mensajes después de la hora de unión
+    db.ref('messages').orderByChild('time').startAt(Number(joinTime)).on('value', snapshot => {
+        const container = document.getElementById('messages');
+        const wasAtBottom = container.scrollHeight - container.scrollTop <= container.clientHeight + 100;
+        
+        container.innerHTML = "";
+        let lastDate = "";
+
+        snapshot.forEach(child => {
+            const id = child.key;
+            const d = child.val();
+            
+            // Si está oculto para mí, no lo mostramos
+            if (hiddenMsgs.includes(id)) return;
+
+            const isMe = d.user === myName;
+            const timeStr = new Date(d.time).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+
+            const wrap = document.createElement('div');
+            wrap.className = 'bubble-container';
+            
+            const bubble = document.createElement('div');
+            bubble.className = `bubble ${isMe ? 'sent' : 'received'}`;
+            bubble.dataset.id = id;
+            bubble.dataset.user = d.user;
+
+            // MENU AL HACER CLIC O MANTENER
+            bubble.onclick = (e) => showMenu(e, id, isMe);
+
+            let inner = isMe ? '' : `<div class="name-tag">${d.user}</div>`;
+            if (d.type === 'image') inner += `<img class="bubble-img" src="${d.url}">`;
+            else inner += d.text;
+            
+            inner += `<div class="time-tag ${isMe?'':'left'}">${timeStr}</div>`;
+            
+            // Mostrar Reacciones
+            if (d.reactions) {
+                const reactWrap = document.createElement('div');
+                reactWrap.className = 'reactions';
+                Object.entries(d.reactions).forEach(([emoji, count]) => {
+                    const chip = document.createElement('div');
+                    chip.className = 'reaction-chip';
+                    chip.innerHTML = `<span>${emoji}</span>`;
+                    reactWrap.appendChild(chip);
+                });
+                bubble.appendChild(reactWrap);
+            }
+
+            bubble.innerHTML = inner;
+            wrap.appendChild(bubble);
+            container.appendChild(wrap);
+        });
+
+        if (wasAtBottom) container.scrollTop = container.scrollHeight;
+        
+        // Notificación si no estamos viendo la web
+        if (document.hidden && Notification.permission === "granted") {
+            new Notification("Nuevo mensaje en el Chat 💗");
+        }
+    });
 }
 
-// ── MENSAJES ──
 function sendMessage() {
     const input = document.getElementById('msg-input');
-    const text  = input.value.trim();
+    const text = input.value.trim();
     if (!text) return;
-    input.value = "";
-    input.style.height = 'auto';
     db.ref('messages').push({ type:'text', user:myName, avatar:myAvatar, text, time:Date.now() });
+    input.value = "";
 }
 
-// ── FOTO ──
-const photoFile = document.getElementById('photo-file');
-let   pendingPhoto = null;
+// MENÚ DE MENSAJE
+function showMenu(e, id, isMe) {
+    e.preventDefault();
+    activeMsgId = id;
+    const menu = document.getElementById('msg-menu');
+    menu.style.display = 'block';
+    menu.style.left = Math.min(e.pageX, window.innerWidth - 190) + 'px';
+    menu.style.top = Math.min(e.pageY, window.innerHeight - 150) + 'px';
+    
+    document.getElementById('menu-del-all').style.display = isMe ? 'block' : 'none';
+}
 
-photoFile.addEventListener('change', e => {
-    const f = e.target.files[0];
-    if (!f) return;
-    pendingPhoto = f;
-    const reader = new FileReader();
-    reader.onload = ev => {
-        document.getElementById('img-preview-thumb').src = ev.target.result;
-        document.getElementById('img-preview-bar').style.display = 'flex';
-    };
-    reader.readAsDataURL(f);
-    e.target.value = "";
+function react(emoji) {
+    if (!activeMsgId) return;
+    db.ref(`messages/${activeMsgId}/reactions/${emoji}`).set(true);
+    closeMenu();
+}
+
+function deleteForMe() {
+    hiddenMsgs.push(activeMsgId);
+    localStorage.setItem("hiddenMsgs", JSON.stringify(hiddenMsgs));
+    closeMenu();
+    loadMessages(); // Refrescar vista
+}
+
+function deleteForEveryone() {
+    if (confirm("¿Eliminar este mensaje para todos?")) {
+        db.ref(`messages/${activeMsgId}`).remove();
+    }
+    closeMenu();
+}
+
+function closeMenu() {
+    document.getElementById('msg-menu').style.display = 'none';
+}
+
+document.addEventListener('click', (e) => {
+    if (!e.target.closest('.bubble') && !e.target.closest('#msg-menu')) closeMenu();
 });
 
-document.getElementById('send-btn').addEventListener('click', async () => {
-    if (pendingPhoto) { await sendPhoto(); return; }
-    if (isRecording)  { await stopRec();  return; }
-    sendMessage();
-}, true); // capture phase so it runs before onclick
+// FOTOS
+document.getElementById('photo-file').addEventListener('change', async (e) => {
+    const f = e.target.files[0];
+    if (!f) return;
+    showToast("Enviando foto...");
+    const ref = storage.ref(`photos/${Date.now()}_${f.name}`);
+    await ref.put(f);
+    const url = await ref.getDownloadURL();
+    db.ref('messages').push({ type:'image', user:myName, url, time:Date.now() });
+});
 
-async function sendPhoto() {
-    if (!pendingPhoto) return;
-    showToast("Enviando imagen...");
-    cancelImg();
-    try {
-        const url = await uploadFile(pendingPhoto, 'photos/' + Date.now() + '_' + pendingPhoto.name);
-        db.ref('messages').push({ type:'image', user:myName, avatar:myAvatar, url, time:Date.now() });
-    } catch(e) { showToast("Error al enviar imagen"); }
-    pendingPhoto = null;
-}
-
-function cancelImg() {
-    pendingPhoto = null;
-    document.getElementById('img-preview-bar').style.display = 'none';
-    document.getElementById('img-preview-thumb').src = '';
-}
-
-// ── AUDIO ──
-let mediaRecorder = null;
-let audioChunks   = [];
-let isRecording   = false;
-let recTimerInt   = null;
-let recSeconds    = 0;
-
-async function toggleRec() {
-    if (isRecording) { await stopRec(); return; }
-    try {
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        mediaRecorder = new MediaRecorder(stream);
-        audioChunks = [];
-        mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
-        mediaRecorder.start();
-        isRecording = true;
-        recSeconds  = 0;
-        document.getElementById('mic-btn').classList.add('active');
-        document.getElementById('rec-indicator').style.display = 'flex';
-        recTimerInt = setInterval(() => {
-            recSeconds++;
-            const m = Math.floor(recSeconds/60);
-            const s = String(recSeconds%60).padStart(2,'0');
-            document.getElementById('rec-time').textContent = `${m}:${s}`;
-        }, 1000);
-    } catch(e) { showToast("No se pudo acceder al micrófono"); }
-}
-
-async function stopRec() {
-    if (!mediaRecorder) return;
-    return new Promise(resolve => {
-        mediaRecorder.onstop = async () => {
-            clearInterval(recTimerInt);
-            document.getElementById('rec-indicator').style.display = 'none';
-            document.getElementById('mic-btn').classList.remove('active');
-            isRecording = false;
-            const blob = new Blob(audioChunks, { type: 'audio/webm' });
-            const dur  = recSeconds;
-            showToast("Enviando audio...");
-            try {
-                const url = await uploadFile(blob, 'audios/' + Date.now() + '.webm');
-                db.ref('messages').push({ type:'audio', user:myName, avatar:myAvatar, url, dur, time:Date.now() });
-            } catch(e) { showToast("Error al enviar audio"); }
-            mediaRecorder.stream.getTracks().forEach(t => t.stop());
-            mediaRecorder = null;
-            resolve();
-        };
-        mediaRecorder.stop();
-    });
-}
-
-function cancelRec() {
-    if (!mediaRecorder) return;
-    clearInterval(recTimerInt);
-    mediaRecorder.stream.getTracks().forEach(t => t.stop());
-    mediaRecorder = null;
-    isRecording = false;
-    audioChunks = [];
-    document.getElementById('rec-indicator').style.display = 'none';
-    document.getElementById('mic-btn').classList.remove('active');
-}
-
-// ── EMOJI ──
-const EMOJIS = ['😀','😂','🥰','😍','🤩','😘','😎','🥳','😭','😤','🤔','🥺','😈','🔥','💯','👀','💗','💕','💖','✨','🌸','🎉','👏','🙌','💪','🤝','👋','❤️','💀','😅','🫶','🥹','😏','😌','🤭','😴','🤯','😡','🫠','🥲'];
-
-function buildEmojiPanel() {
-    const panel = document.getElementById('emoji-panel');
-    EMOJIS.forEach(em => {
-        const span = document.createElement('span');
-        span.textContent = em;
-        span.addEventListener('click', () => {
-            const input = document.getElementById('msg-input');
-            const pos = input.selectionStart ?? input.value.length;
-            input.value = input.value.slice(0, pos) + em + input.value.slice(pos);
-            input.focus();
-        });
-        panel.appendChild(span);
-    });
+// HELPERS
+function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg; t.style.opacity = '1';
+    setTimeout(() => t.style.opacity = '0', 2000);
 }
 
 function toggleEmoji() {
-    const panel = document.getElementById('emoji-panel');
-    const btn   = document.getElementById('emoji-btn');
-    const open  = panel.style.display === 'flex';
-    panel.style.display = open ? 'none' : 'flex';
-    btn.classList.toggle('active', !open);
+    const p = document.getElementById('emoji-panel');
+    p.style.display = p.style.display === 'flex' ? 'none' : 'flex';
 }
 
-// ── CARGAR MENSAJES ──
-let lastDate = "";
-
-function loadMessages() {
-    db.ref('messages').limitToLast(100).on('value', snapshot => {
-        const container = document.getElementById('messages');
-        container.innerHTML = "";
-        lastDate = "";
-
-        snapshot.forEach(child => {
-            const d    = child.val();
-            const isMe = d.user === myName;
-
-            const msgDate = new Date(d.time).toLocaleDateString('es-ES', { weekday:'long', day:'numeric', month:'short' });
-            if (msgDate !== lastDate) {
-                lastDate = msgDate;
-                const div = document.createElement('div');
-                div.className = 'day-divider';
-                div.textContent = msgDate;
-                container.appendChild(div);
-            }
-
-            const timeStr = new Date(d.time).toLocaleTimeString('es-ES', { hour:'2-digit', minute:'2-digit' });
-            const bubble  = document.createElement('div');
-            bubble.className = `bubble ${isMe ? 'sent' : 'received'}`;
-
-            let inner = isMe ? '' : `<div class="name-tag">${esc(d.user)}</div>`;
-
-            if (d.type === 'text' || !d.type) {
-                inner += esc(d.text);
-            } else if (d.type === 'image') {
-                inner += `<img class="bubble-img" src="${esc(d.url)}" alt="foto" onclick="openLightbox('${esc(d.url)}')">`;
-            } else if (d.type === 'audio') {
-                const dur = d.dur || 0;
-                const wavesBars = Array.from({length:20}, (_,i) => {
-                    const h = 6 + Math.floor(Math.abs(Math.sin(i*0.8))*16);
-                    return `<div class="wave-bar" style="height:${h}px"></div>`;
-                }).join('');
-                inner += `<div class="audio-bubble">
-                    <button class="play-btn" onclick="playAudio(this, '${esc(d.url)}')">
-                        <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-                    </button>
-                    <div class="audio-waves">${wavesBars}</div>
-                    <span class="audio-dur">${Math.floor(dur/60)}:${String(dur%60).padStart(2,'0')}</span>
-                </div>`;
-            }
-
-            inner += `<div class="time-tag ${isMe?'':'left'}">${timeStr}</div>`;
-            bubble.innerHTML = inner;
-            container.appendChild(bubble);
-        });
-
-        container.scrollTop = container.scrollHeight;
-    });
+function logout() {
+    localStorage.clear();
+    location.reload();
 }
 
-// ── REPRODUCIR AUDIO ──
-let currentAudio = null;
-
-function playAudio(btn, url) {
-    if (currentAudio && !currentAudio.paused) {
-        currentAudio.pause();
-        currentAudio = null;
-        document.querySelectorAll('.play-btn svg').forEach(s => s.innerHTML = '<path d="M8 5v14l11-7z"/>');
-        return;
-    }
-    currentAudio = new Audio(url);
-    btn.querySelector('svg').innerHTML = '<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>';
-    currentAudio.onended = () => {
-        btn.querySelector('svg').innerHTML = '<path d="M8 5v14l11-7z"/>';
+// Rellenar panel de emojis
+const ems = ['❤️','😂','😮','😢','🔥','😍','✨','👏','💯','🙌'];
+const panel = document.getElementById('emoji-panel');
+ems.forEach(em => {
+    const s = document.createElement('span');
+    s.textContent = em;
+    s.onclick = () => {
+        document.getElementById('msg-input').value += em;
+        toggleEmoji();
     };
-    currentAudio.play();
-}
-
-// ── LIGHTBOX ──
-function openLightbox(url) {
-    document.getElementById('lightbox-img').src = url;
-    document.getElementById('lightbox').style.display = 'flex';
-}
-
-function closeLightbox() {
-    document.getElementById('lightbox').style.display = 'none';
-}
-
-// ── UPLOAD a Firebase Storage ──
-function uploadFile(file, path) {
-    return new Promise((resolve, reject) => {
-        const ref  = storage.ref(path);
-        const task = ref.put(file);
-        task.on('state_changed', null, reject, async () => {
-            const url = await ref.getDownloadURL();
-            resolve(url);
-        });
-    });
-}
-
-// ── HELPERS ──
-function esc(str) {
-    if (!str) return '';
-    return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-
-function showToast(msg) {
-    const t = document.getElementById('toast');
-    t.textContent = msg;
-    t.style.opacity = '1';
-    clearTimeout(t._tid);
-    t._tid = setTimeout(() => t.style.opacity = '0', 2400);
-}
-
-// ── TEXTAREA auto-resize ──
-document.addEventListener('DOMContentLoaded', () => {
-    buildEmojiPanel();
-
-    if (myName) startChat();
-
-    const msgInput = document.getElementById('msg-input');
-    msgInput.addEventListener('input', () => {
-        msgInput.style.height = 'auto';
-        msgInput.style.height = Math.min(msgInput.scrollHeight, 100) + 'px';
-    });
-    msgInput.addEventListener('keydown', e => {
-        if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
-    });
-
-    document.getElementById('username-input').addEventListener('keydown', e => {
-        if (e.key === 'Enter') joinChat();
-    });
+    panel.appendChild(s);
 });
 </script>
 </body>
