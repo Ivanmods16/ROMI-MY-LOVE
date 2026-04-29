@@ -156,18 +156,26 @@
             width: 100%;
             height: 80px;
             border-radius: 15px;
-            display: none;
             border: none;
+            opacity: 0;
+            transition: opacity 0.8s ease;
         }
 
         /* Sección de Flores */
         #flores-container {
-            display: none;
             margin-top: 30px;
+            display: flex;
             justify-content: center;
             gap: 20px;
             flex-wrap: wrap;
-            animation: fadeIn 1s ease;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.8s ease, transform 0.8s ease;
+        }
+
+        #flores-container.visible {
+            opacity: 1;
+            transform: translateY(0);
         }
 
         .flower {
@@ -274,14 +282,31 @@
     <h2>Para ti… 💖</h2>
     <p>
         Hola mi romiuu…<br><br>
+
         La verdad no soy muy bueno expresándome, pero igual quería escribirte esto…<br><br>
+
         <b>Mi Romi hermosa, princesa…</b> eres tan perfecta ✨<br><br>
+
         Me gustas mucho, más de lo que puedo explicar. Me encanta todo de ti, tu forma de ser, tu sonrisa… todo.<br><br>
+
         Y aunque no sepa decirlo de la mejor forma, lo que siento por vos es real.<br><br>
+
         Me pasé toda la noche haciendo esto, con mucho amor…<br>
         ojalá algún día pueda tener algo serio y lindo contigo 💖<br><br>
+
+        Anoche me puse a pensar mucho en vos… incluso le pedí a Dios que, si se puede, seas para mí. Porque sinceramente, si no es contigo, no quiero nada con nadie.<br><br>
+
+        Desde ese beso que nos dimos, sentí algo diferente… como mariposas en la panza. Ahí me di cuenta de lo mucho que me gustás y lo importante que sos para mí.<br><br>
+
+        Me tenés muy enganchado, no te voy a mentir. Sos alguien muy especial en mi vida.<br><br>
+
+        Quiero demostrarte todo mi amor, porque todavía no conocés mi lado más cariñoso… pero de verdad lo tengo.<br><br>
+
+        Siempre te voy a querer, te aprecio muchísimo. Sos una gran mujer, mi Romiuu 💖<br><br>
+
         ✨ <b>Me encantas</b> ✨
     </p>
+
     <p style="font-size: 0.9rem; font-style: italic;">
         — Con todo mi cariño 💕<br>
         <b>Atentamente, Ivan 💌</b>
@@ -291,15 +316,10 @@
     <p style="font-family: 'Dancing Script', cursive; font-size: 1.3rem; color: var(--primary-pink); margin-bottom: 5px;">
         Esta música es para ti ❤️ 🎶
     </p>
-    <!-- Botones de acción -->
-    <div class="actions">
-        <button onclick="reproducir()">🎵 Reproducir canción</button>
-        <button onclick="mostrarFlores()" id="btnFlores">🌸 VER FLORES</button>
-    </div>
 
     <!-- Reproductor de música -->
     <iframe id="musica"
-            src="https://www.youtube.com/embed/kuPZD7uEJPo"
+            src=""
             allow="autoplay">
     </iframe>
 
@@ -344,22 +364,34 @@
             inicio.style.display = "none";
             carta.style.display = "block";
             footer.style.display = "block";
+
             setTimeout(() => {
+                // Mostrar carta con animación
                 carta.style.opacity = "1";
                 carta.style.transform = "scale(1) rotateY(0deg)";
+
+                // Reproducir música automáticamente
+                setTimeout(() => {
+                    reproducir();
+                }, 600);
+
+                // Mostrar flores automáticamente
+                setTimeout(() => {
+                    mostrarFlores();
+                }, 1000);
+
             }, 50);
         }, 800);
     }
 
     function reproducir() {
-        let iframe = document.getElementById("musica");
-        iframe.style.display = "block";
+        const iframe = document.getElementById("musica");
         iframe.src = "https://www.youtube.com/embed/kuPZD7uEJPo?autoplay=1";
+        iframe.style.opacity = "1";
     }
 
     function mostrarFlores() {
         const container = document.getElementById("flores-container");
-        container.style.display = "flex";
         container.innerHTML = "";
 
         for (let i = 0; i < 3; i++) {
@@ -378,11 +410,14 @@
             container.appendChild(flower);
         }
 
-        document.getElementById("btnFlores").style.display = "none";
+        // Animar con clase visible
+        setTimeout(() => {
+            container.classList.add('visible');
+        }, 100);
 
         setTimeout(() => {
             window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
-        }, 100);
+        }, 300);
     }
 </script>
 
